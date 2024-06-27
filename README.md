@@ -16,6 +16,6 @@ $ sudo apt-get install libx11-dev libxext-dev
 ## Run the application
 
 ```console
-$ cc -o colorp colorp.c
+$ cc -o colorp colorp.c -lX11
 $ ./colorp
 ```
