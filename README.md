@@ -1,6 +1,6 @@
 # colorp
 
-![](./demo.gif)
+
 
 Simple color picker for Linux made with Xlib (X11)
 
