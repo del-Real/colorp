@@ -5,8 +5,8 @@
 Simple color picker for Linux made with Xlib (X11)
 
 - This application must be run via terminal
-- To copy a color code, select it and press [Ctrl] + [Shift] + [C]
-- Press [Ctrl] + [C] to exit the application
+- To **copy** a color code, select it and press **[Ctrl] + [Shift] + [C]**
+- Press **[Ctrl] + [C]** to **exit** the application
 
 ## Dependencies
 
