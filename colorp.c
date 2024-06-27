@@ -71,9 +71,12 @@ int main() {
                 XFillRectangle(display, win, gc, 0, 0, SQUARE_SIZE, SQUARE_SIZE);
 
                 if (color.pixel != prevColor.pixel) {
-                    // Print color and Hex code
+                    // Print color
                     printf("\033[38;2;%d;%d;%dm██████████\033[0m", color.red >> 8, color.green >> 8, color.blue >> 8);
-                    printf(" HEX | #%02x%02x%02x\n", color.red >> 8, color.green >> 8, color.blue >> 8);
+                    // Print Hex code
+                    printf("    HEX | #%02x%02x%02x", color.red >> 8, color.green >> 8, color.blue >> 8);
+                    // Print RGB code
+                    printf("\tRGB | %d %d %d\n", color.red >> 8, color.green >> 8, color.blue >> 8);
                 }
                 prevColor.pixel = pixel;
                 XDestroyImage(image);
