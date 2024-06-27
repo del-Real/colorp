@@ -5,7 +5,7 @@
 Simple color picker for Linux made with Xlib (X11)
 
 - This application must be run via terminal
-- Press [Q] or [Esc] to exit the application
+- Press [Ctrl] + [C] to exit the application
 
 ## Dependencies
 
