@@ -1,3 +1,7 @@
+<div align="center">
+<img width="250" src="colorp_logo.png" alt="colorp logo">
+</div>
+
 # colorp
 
 ![](./demo.gif)
