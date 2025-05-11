@@ -1,111 +1,144 @@
-// colorp | A simple color picker for Linux
-// Copyright (c) 2024 Alberto del Real
-// This code is licensed under the MIT License.
-
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #define SQUARE_SIZE 100
+#define REFRESH_INTERVAL 50000
 
 int main() {
     Display *display;
     Window root, win;
     Window dummy_win;
     XEvent event;
+    Atom wmStateAbove, wmState;
+    XEvent xev;
 
     int screen;
     int x, y;
     int dummy_int;
     unsigned int mask;
-    int shouldClose = 1; // Flag to control the loop
-    unsigned long pixel;
+    bool shouldClose = true;
+    unsigned long pixel = 0;
+    unsigned long prevPixel = 1;
 
-    XImage *image;
+    XImage *image = NULL;
     XColor color;
-    XColor prevColor;
     GC gc;
 
     // Open connection to the X server
-    display = XOpenDisplay(NULL);
+    if (!(display = XOpenDisplay(NULL))) {
+        fprintf(stderr, "Cannot open display\n");
+        return 1;
+    }
 
     // Get the root window
     screen = DefaultScreen(display);
     root = RootWindow(display, screen);
 
     // Create window
-    win = XCreateSimpleWindow(display, root, 10, 10, SQUARE_SIZE, SQUARE_SIZE, 1, BlackPixel(display, screen),
-                              WhitePixel(display, screen));
+    win = XCreateSimpleWindow(display, root, 0, 0, SQUARE_SIZE, SQUARE_SIZE, 1,
+                              BlackPixel(display, screen), WhitePixel(display, screen));
 
-    // Select input events for the window
-    XSelectInput(display, win, ExposureMask | KeyPressMask);
+    // Set window name
+    XStoreName(display, win, "colorp");
 
-    // Map/show the window
-    XMapWindow(display, win);
+    // Get WM_STATE atom
+    wmState = XInternAtom(display, "_NET_WM_STATE", False);
+    wmStateAbove = XInternAtom(display, "_NET_WM_STATE_ABOVE", False);
 
-    // Create graphics context
-    gc = XCreateGC(display, win, 0, NULL);
+    // Set _NET_WM_STATE_ABOVE property to make window always on top
+    memset(&xev, 0, sizeof(xev));
+    xev.type = ClientMessage;
+    xev.xclient.window = win;
+    xev.xclient.message_type = wmState;
+    xev.xclient.format = 32;
+    xev.xclient.data.l[0] = 1;  // _NET_WM_STATE_ADD
+    xev.xclient.data.l[1] = wmStateAbove;
+    xev.xclient.data.l[2] = 0;
 
-    printf("==============================================\n");
-    printf("    colorp by Alberto del Real (RedSantar)\n");
-    printf("----------------------------------------------\n");
-    printf(" Press [Q] or [Esc] to exit the application\n");
-    printf("==============================================\n\n");
+    XSelectInput(display, win, ExposureMask | KeyPressMask);                                    // Select input events for the window
+    XMapWindow(display, win);                                                                   // Map/show the window
+    XSendEvent(display, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);  // Send the ClientMessage
+    gc = XCreateGC(display, win, 0, NULL);                                                      // Create graphics context
 
+    // Print instructions
+    printf("\033[1;36m╔═══════════════════════════════════════╗\033[0m\n");
+    printf("\033[1;36m║ \033[0m  \033[1;35m● \033[1;31m● \033[1;33m● \033[1;32m● \033[1;36m● \033[1;34m●\033[0m  \033[1;37mcolorp\033[0m  \033[1;34m● \033[1;36m● \033[1;32m● \033[1;33m● \033[1;31m● \033[1;35m●\033[0m  \033[1;36m  ║\033[0m\n");
+    printf("\033[1;36m║\033[0m  \033[1;37mA simple CLI Color Picker for Linux \033[0m \033[1;36m║\033[0m\n");
+    printf("\033[1;36m╟───────────────────────────────────────╢\033[0m\n");
+    printf("\033[1;36m║\033[0m \033[1;33m➤\033[0m Move mouse to sample colors         \033[1;36m║\033[0m\n");
+    printf("\033[1;36m║\033[0m \033[1;33m➤\033[0m Press \033[1;37m[Q]\033[0m or \033[1;37m[Esc]\033[0m to exit          \033[1;36m║\033[0m\n");
+    printf("\033[1;36m╚═══════════════════════════════════════╝\033[0m\n");
+    printf("\n");
+
+    // =========
     // Main loop
+    // =========
     while (shouldClose) {
-        // Query the pointer/mouse cursor
-        if (XQueryPointer(display, root, &dummy_win, &dummy_win, &x, &y, &dummy_int, &dummy_int, &mask)) {
-            // Get the image at the pointer's coordinates
-            image = XGetImage(display, root, x, y, 1, 1, AllPlanes, ZPixmap);
-            if (image != NULL) {
-                pixel = XGetPixel(image, 0, 0);
-                color.pixel = pixel;
-                XQueryColor(display, DefaultColormap(display, screen), &color);
-
-                // Set the foreground color of the graphics context
-                XSetForeground(display, gc, pixel);
-
-                // Fill the window with the color
-                XFillRectangle(display, win, gc, 0, 0, SQUARE_SIZE, SQUARE_SIZE);
-
-                if (color.pixel != prevColor.pixel) {
-                    // Print color
-                    printf("\033[38;2;%d;%d;%dm██████████\033[0m", color.red >> 8, color.green >> 8, color.blue >> 8);
-                    // Print Hex code
-                    printf("    HEX | #%02x%02x%02x", color.red >> 8, color.green >> 8, color.blue >> 8);
-                    // Print RGB code
-                    printf("\tRGB | %d %d %d\n", color.red >> 8, color.green >> 8, color.blue >> 8);
-                }
-                prevColor.pixel = pixel;
-                XDestroyImage(image);
-            }
-        }
-
-        // Event handler
+        // Handle pending events first for better responsiveness
         while (XPending(display)) {
             XNextEvent(display, &event);
             if (event.type == Expose) {
                 // Repaint the window with the current color
                 XFillRectangle(display, win, gc, 0, 0, SQUARE_SIZE, SQUARE_SIZE);
-            }
-
-            // Close app is Q_KEY or ESC is pressed
-            else if (event.type == KeyPress) {
+            } else if (event.type == KeyPress) {
                 KeySym keysym = XLookupKeysym(&event.xkey, 0);
                 if (keysym == XK_q || keysym == XK_Escape) {
-
-                    shouldClose = 0;
+                    shouldClose = false;
                 }
             }
         }
 
-        // Sleep for a short duration to avoid flooding the output (100 milliseconds)
-        usleep(100000);
+        // Query the pointer/mouse cursor
+        if (XQueryPointer(display, root, &dummy_win, &dummy_win, &x, &y, &dummy_int, &dummy_int, &mask)) {
+            // Only get the image if it is a new position
+            if (image != NULL) {
+                XDestroyImage(image);
+            }
+
+            image = XGetImage(display, root, x, y, 1, 1, AllPlanes, ZPixmap);
+            if (image != NULL) {
+                pixel = XGetPixel(image, 0, 0);
+
+                // Only update if the color has changed
+                if (pixel != prevPixel) {
+                    prevPixel = pixel;
+
+                    // Update the color info
+                    color.pixel = pixel;
+                    XQueryColor(display, DefaultColormap(display, screen), &color);
+
+                    // Set the foreground color and fill the window
+                    XSetForeground(display, gc, pixel);
+                    XFillRectangle(display, win, gc, 0, 0, SQUARE_SIZE, SQUARE_SIZE);
+
+                    // Print color HEX/RGB info
+                    int r = color.red >> 8;
+                    int g = color.green >> 8;
+                    int b = color.blue >> 8;
+
+                    printf("\033[38;2;%d;%d;%dm██████████\033[0m", r, g, b);
+                    printf("    HEX | #%02x%02x%02x", r, g, b);
+                    printf("\tRGB | %d %d %d\n", r, g, b);
+                }
+            }
+        }
+
+        XFlush(display);           // Flush pending requests to improve responsiveness
+        usleep(REFRESH_INTERVAL);  // Sleep to avoid flooding CPU
     }
 
-    // Close the connection to the X server
+    // Clean up
+    if (image != NULL) {
+        XDestroyImage(image);
+    }
+
+    XFreeGC(display, gc);
+    XDestroyWindow(display, win);
     XCloseDisplay(display);
 
     return 0;
