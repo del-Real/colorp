@@ -6,11 +6,12 @@
 
 ![](./demo.gif)
 
-Simple color picker for Linux made with Xlib (X11)
+Simple CLI color picker for Linux made with Xlib (X11)
 
-- This application must be run via terminal
-- To **copy** a color code, select it and press **[Ctrl] + [Shift] + [C]**
-- Press **[Ctrl] + [C]** to **exit** the application
+- Displays RGB and HEX color values (the application must be run via terminal)
+- To **copy** a color code, select it from the terminal and press **[Ctrl] + [Shift] + [C]**
+- Press **[Q]** or **[Esc]** to **exit** the application
+- Press **[Ctrl] + [C]** to **force exit** the application
 
 ## Dependencies
 
