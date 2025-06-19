@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libxext-dev
+
+    - name: Build
+      run: |
+        gcc -std=c99 -O2 -o colorp colorp.c -lX11
+        strip colorp
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: colorp
+        body: |
+          ## colorp ${{ github.ref_name }}
+          
+          Simple CLI color picker for Linux (x86_64)
+          
+          ### Installation:
+          
+          ```bash
+          # Download and make executable
+          chmod +x colorp
+          
+          # Install dependencies (Debian/Ubuntu)
+          sudo apt-get install libx11-6 libxext6
+          
+          # Run
+          ./colorp
+          ```
+          
+          ### Usage:
+          - Move mouse to sample colors
+          - Press **Q** or **Esc** to exit
+          - Select color values and **Ctrl+Shift+C** to copy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
