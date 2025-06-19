@@ -23,29 +23,36 @@ jobs:
 
     - name: Build
       run: |
-        gcc -std=c99 -D_POSIX_C_SOURCE=200809L -O2 -o colorp colorp.c -lX11
-        strip colorp
+        gcc -std=c99 -D_POSIX_C_SOURCE=200809L -O2 -o colorp-linux-x86_64 colorp.c -lX11
+        strip colorp-linux-x86_64
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: colorp
+        files: colorp-linux-x86_64
         body: |
           ## colorp ${{ github.ref_name }}
           
-          Simple CLI color picker for Linux (x86_64)
+          Simple CLI color picker for Linux
+          
+          ### Download:
+          
+          **colorp-linux-x86_64** - For 64-bit Intel/AMD Linux systems
           
           ### Installation:
           
           ```bash
           # Download and make executable
-          chmod +x colorp
+          chmod +x colorp-linux-x86_64
           
           # Install dependencies (Debian/Ubuntu)
           sudo apt-get install libx11-6 libxext6
           
           # Run
-          ./colorp
+          ./colorp-linux-x86_64
+          
+          # Optional: Install to system PATH
+          sudo mv colorp-linux-x86_64 /usr/local/bin/colorp
           ```
           
           ### Usage:
