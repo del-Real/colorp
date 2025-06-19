@@ -13,7 +13,7 @@ Simple CLI color picker for Linux made with Xlib (X11)
 - Press **[Q]** or **[Esc]** in the terminal to **exit** the application
 - Press **[Ctrl] + [C]** in the terminal to **force exit** the application
 
-## Dependencies
+## Dependencies for manual installation
 
 ### Debian / Ubuntu
 
