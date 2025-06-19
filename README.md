@@ -13,9 +13,9 @@ Simple CLI color picker for Linux made with Xlib (X11)
 - Press **[Q]** or **[Esc]** in the terminal to **exit** the application
 - Press **[Ctrl] + [C]** in the terminal to **force exit** the application
 
-## Dependencies (manual installation)
+## Manual installation
 
-### Debian / Ubuntu
+### Dependencies (Debian / Ubuntu)
 
 ```console
 $ sudo apt-get install libx11-dev libxext-dev
