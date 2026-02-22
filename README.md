@@ -4,24 +4,29 @@
 
 # colorp
 
+Simple CLI color picker for Linux made with Xlib (X11). 
+
+Displays RGB and HEX color values (__the application must be run via terminal__)
+
 ![](./demo.gif)
 
-Simple CLI color picker for Linux made with Xlib (X11)
+## Controls
 
-- Displays RGB and HEX color values (the application must be run via terminal)
-- To **copy** a color value, select it from the terminal and press **[Ctrl] + [Shift] + [C]**
-- Press **[Q]** or **[Esc]** in the terminal to **exit** the application
-- Press **[Ctrl] + [C]** in the terminal to **force exit** the application
+| Keys                                | Action                  |
+|-------------------------------------|-------------------------|
+| [ **Ctrl** ] + [ **Shift** ] + [ **C** ]  | **Copy** color value    |
+| [ **Q** ] or [ **Esc** ]                | **Exit** the app        |
+| [ **Ctrl** ] + [ **C** ]                | **Force exit** the app  |
 
-## Manual installation
+## Installation
 
-### Dependencies (Debian / Ubuntu)
+#### Dependencies
 
 ```console
 $ sudo apt-get install libx11-dev libxext-dev
 ```
 
-## Run the application
+## Run
 
 ```console
 $ cc -o colorp colorp.c -lX11
